@@ -295,4 +295,20 @@ header {
 .post-metadata time {
 	margin-right: 1em;
 }
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
 
+.lang-switch a {
+  margin-left: .5rem;
+  text-decoration: none;
+  opacity: .75;
+}
+
+.lang-switch a[aria-current="page"] {
+  opacity: 1;
+  text-decoration: underline;
+}
