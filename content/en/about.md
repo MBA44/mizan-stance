@@ -2,6 +2,7 @@
 title: "About"
 lang: en
 permalink: /en/about/
+translation: /fr/a-propos/
 ---
 
 This project is a cartography of vigilance.  
