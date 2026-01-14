@@ -42,8 +42,15 @@
 	<body>
 		<a href="#main" id="skip-link" class="visually-hidden">Skip to main content</a>
 
-		<header>
-			<a href="/" class="home-link">{{ metadata.title }}</a>
+		<<header>
+  <a href="/" class="home-link">{{ metadata.title }}</a>
+
+  {% include "partials/lang-switch.njk" %}
+
+  <nav>
+    ...
+  </nav>
+</header>
 
 			{#- Read more about `eleventy-navigation` at https://www.11ty.dev/docs/plugins/navigation/ #}
 			<nav>
