@@ -312,3 +312,17 @@ header {
   opacity: 1;
   text-decoration: underline;
 }
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.lang-switch {
+  font-size: 0.95rem;
+}
+
+.lang-switch a {
+  text-decoration: underline;
+}
