@@ -38,13 +38,33 @@
 
 		{#- Add the heading-anchors web component to the JavaScript bundle #}
 		<script type="module">{% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}</script>
-	</head>
+	<style>
+  .lang-switch { float:right; font-size:0.95rem; }
+  .lang-switch a { text-decoration: underline; }
+  .lang-switch strong { font-weight: 700; }
+</style>
+</head>
 	<body>
 		<a href="#main" id="skip-link" class="visually-hidden">Skip to main content</a>
 
 		<<header>
   <div class="topbar">
   <a href="/" class="home-link">{{ metadata.title }}</a>
+{% set currentLang = lang or metadata.language or "fr" %}
+{% set otherLang = "en" if currentLang == "fr" else "fr" %}
+{% set otherUrl = translation or ("/" + otherLang + "/") %}
+
+<div class="lang-switch" aria-label="Language switcher">
+  {% if currentLang == "fr" %}
+    <strong>FR</strong>
+    <span> · </span>
+    <a href="{{ otherUrl }}">EN</a>
+  {% else %}
+    <a href="{{ otherUrl }}">FR</a>
+    <span> · </span>
+    <strong>EN</strong>
+  {% endif %}
+</div>
 
   {# Language switch #}
   {% set currentLang = lang or metadata.language or "fr" %}
