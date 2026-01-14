@@ -43,7 +43,21 @@
 		<a href="#main" id="skip-link" class="visually-hidden">Skip to main content</a>
 
 		<<header>
+  <div class="topbar">
   <a href="/" class="home-link">{{ metadata.title }}</a>
+
+  {# Language switch #}
+  {% set currentLang = lang or metadata.language or "fr" %}
+  <nav aria-label="Language switch" class="lang-switch">
+    {% if currentLang == "fr" %}
+      <a href="/fr/" aria-current="page">FR</a>
+      <a href="/en/">EN</a>
+    {% else %}
+      <a href="/fr/">FR</a>
+      <a href="/en/" aria-current="page">EN</a>
+    {% endif %}
+  </nav>
+</div>
 
   {% include "partials/lang-switch.njk" %}
 
