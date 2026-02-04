@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ lang or metadata.language or 'fr' }}">
+<html lang="{{ page.data.lang or metadata.language or 'fr' }}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,15 +14,16 @@
     <link rel="canonical" href="https://mizan-stance.org{{ page.url }}">
 
     {# =========================
-       HREFLANG (FR/EN) — OPTIMISÉ
+       HREFLANG (FR/EN) — ROBUSTE
        - Site non-miroir : URLs FR/EN peuvent différer
-       - Source de vérité : front-matter `lang` + `translation`
+       - Source de vérité : front-matter via page.data.lang + page.data.translation
        - x-default : toujours la page seuil "/"
        ========================= #}
 
     {% set site = "https://mizan-stance.org" %}
     {% set p = page.url %}
-    {% set currentLang = lang or metadata.language or "fr" %}
+    {% set currentLang = page.data.lang or metadata.language or "fr" %}
+    {% set translationUrl = page.data.translation %}
 
     {# x-default partout (utile à Google) #}
     <link rel="alternate" hreflang="x-default" href="{{ site }}/" />
@@ -31,6 +32,7 @@
     {% if p == "/" %}
       <link rel="alternate" hreflang="fr" href="{{ site }}/fr/" />
       <link rel="alternate" hreflang="en" href="{{ site }}/en/" />
+      <link rel="alternate" hreflang="x-default" href="{{ site }}/" />
 
     {% else %}
 
@@ -38,14 +40,14 @@
       <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}" />
 
       {# Déclarer la traduction seulement si elle est explicitement définie #}
-      {% if translation %}
+      {% if translationUrl %}
         {% set otherLang = "en" if currentLang == "fr" else "fr" %}
-        <link rel="alternate" hreflang="{{ otherLang }}" href="{{ site }}{{ translation }}" />
+        <link rel="alternate" hreflang="{{ otherLang }}" href="{{ site }}{{ translationUrl }}" />
       {% endif %}
 
     {% endif %}
 
-    {# Styles (starter Eleventy) #}
+    {# Styles #}
     <style>{% include "css/index.css" %}</style>
     <style>{% getBundle "css" %}</style>
 
@@ -62,13 +64,13 @@
 
         {# =========================
            Language switch (navigation)
-           - Utilise `translation` si présent
+           - Utilise page.data.translation si présent
            - Sinon fallback vers /fr/ ou /en/
            ========================= #}
 
-        {% set navLang = lang or metadata.language or "fr" %}
+        {% set navLang = page.data.lang or metadata.language or "fr" %}
         {% set otherNavLang = "en" if navLang == "fr" else "fr" %}
-        {% set otherUrl = translation or ("/" + otherNavLang + "/") %}
+        {% set otherUrl = page.data.translation or ("/" + otherNavLang + "/") %}
 
         <nav aria-label="Language switch" class="lang-switch">
           {% if navLang == "fr" %}
