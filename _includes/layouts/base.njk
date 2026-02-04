@@ -18,6 +18,27 @@
 
 		{#- Add the heading-anchors web component to the JavaScript bundle #}
 		<script type="module">{% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}</script>
+{# --- HREFLANG (FR/EN) --- #}
+{% set site = "https://mizan-stance.org" %}
+{% set p = page.url %}
+
+{# Homepage spéciale: propose FR/EN + x-default #}
+{% if p == "/" %}
+  <link rel="alternate" hreflang="fr" href="{{ site }}/fr/" />
+  <link rel="alternate" hreflang="en" href="{{ site }}/en/" />
+  <link rel="alternate" hreflang="x-default" href="{{ site }}/" />
+{% else %}
+
+  {# Si on est déjà dans /fr/ -> sister EN #}
+  {% if p.startsWith("/fr/") %}
+    <link rel="alternate" hreflang="fr" href="{{ site }}{{ p }}" />
+    <link rel="alternate" hreflang="en" href="{{ site }}{{ p | replace('/fr/', '/en/') }}" />
+  {% elif p.startsWith("/en/") %}
+    <link rel="alternate" hreflang="en" href="{{ site }}{{ p }}" />
+    <link rel="alternate" hreflang="fr" href="{{ site }}{{ p | replace('/en/', '/fr/') }}" />
+  {% endif %}
+
+{% endif %}
 	</head>
 
 	<body>
