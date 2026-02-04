@@ -7,17 +7,14 @@
     <title>{{ title or metadata.title }}</title>
     <meta name="description" content="{{ description or metadata.description }}">
 
-    {# Feed #}
     <link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="{{ metadata.title }}">
 
-    {# Canonical (domaine unique, sans www) #}
     <link rel="canonical" href="https://mizan-stance.org{{ page.url }}">
+
+    <!-- DEBUG-HREFLANG-BASE-NJK -->
 
     {# =========================
        HREFLANG (FR/EN) — ROBUSTE
-       - Site non-miroir : URLs FR/EN peuvent différer
-       - Source de vérité : front-matter via page.data.lang + page.data.translation
-       - x-default : toujours la page seuil "/"
        ========================= #}
 
     {% set site = "https://mizan-stance.org" %}
@@ -25,34 +22,26 @@
     {% set currentLang = page.data.lang or metadata.language or "fr" %}
     {% set translationUrl = page.data.translation %}
 
-    {# x-default partout (utile à Google) #}
     <link rel="alternate" hreflang="x-default" href="{{ site }}/" />
 
-    {# Homepage : propose les deux entrées #}
     {% if p == "/" %}
       <link rel="alternate" hreflang="fr" href="{{ site }}/fr/" />
       <link rel="alternate" hreflang="en" href="{{ site }}/en/" />
       <link rel="alternate" hreflang="x-default" href="{{ site }}/" />
-
     {% else %}
-
-      {# Toujours déclarer la page courante dans sa langue #}
       <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}" />
-
-      {# Déclarer la traduction seulement si elle est explicitement définie #}
       {% if translationUrl %}
         {% set otherLang = "en" if currentLang == "fr" else "fr" %}
         <link rel="alternate" hreflang="{{ otherLang }}" href="{{ site }}{{ translationUrl }}" />
       {% endif %}
-
     {% endif %}
 
-    {# Styles #}
     <style>{% include "css/index.css" %}</style>
     <style>{% getBundle "css" %}</style>
 
-    {# Scripts #}
-    <script type="module">{% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}</script>
+    <script type="module">
+      {% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}
+    </script>
   </head>
 
   <body>
@@ -61,12 +50,6 @@
     <header>
       <div class="topbar">
         <a href="/" class="home-link">{{ metadata.title }}</a>
-
-        {# =========================
-           Language switch (navigation)
-           - Utilise page.data.translation si présent
-           - Sinon fallback vers /fr/ ou /en/
-           ========================= #}
 
         {% set navLang = page.data.lang or metadata.language or "fr" %}
         {% set otherNavLang = "en" if navLang == "fr" else "fr" %}
@@ -85,7 +68,6 @@
         </nav>
       </div>
 
-      {# Navigation principale (eleventy-navigation) #}
       <nav>
         <h2 class="visually-hidden">Top level navigation menu</h2>
         <ul class="nav">
