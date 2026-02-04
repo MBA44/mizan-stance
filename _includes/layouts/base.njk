@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ lang or metadata.language }}">
+<html lang="{{ lang or metadata.language or 'fr' }}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,30 +10,47 @@
     {# Feed #}
     <link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="{{ metadata.title }}">
 
-    {# Canonical (vérité unique) #}
+    {# Canonical (domaine unique, sans www) #}
     <link rel="canonical" href="https://mizan-stance.org{{ page.url }}">
 
-    {# --- HREFLANG (site NON miroir, basé sur front-matter) --- #}
-    {% set site = "https://mizan-stance.org" %}
-    {% set currentLang = lang or metadata.language %}
+    {# =========================
+       HREFLANG (FR/EN) — OPTIMISÉ
+       - Site non-miroir : URLs FR/EN peuvent différer
+       - Source de vérité : front-matter `lang` + `translation`
+       - x-default : toujours la page seuil "/"
+       ========================= #}
 
-    {# x-default : seuil neutre #}
+    {% set site = "https://mizan-stance.org" %}
+    {% set p = page.url %}
+    {% set currentLang = lang or metadata.language or "fr" %}
+
+    {# x-default partout (utile à Google) #}
     <link rel="alternate" hreflang="x-default" href="{{ site }}/" />
 
-    {# FR / EN uniquement si la page déclare explicitement sa traduction #}
-    {% if translation and currentLang %}
-      <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ page.url }}" />
-      <link rel="alternate" hreflang="{{ "en" if currentLang == "fr" else "fr" }}" href="{{ site }}{{ translation }}" />
+    {# Homepage : propose les deux entrées #}
+    {% if p == "/" %}
+      <link rel="alternate" hreflang="fr" href="{{ site }}/fr/" />
+      <link rel="alternate" hreflang="en" href="{{ site }}/en/" />
+
+    {% else %}
+
+      {# Toujours déclarer la page courante dans sa langue #}
+      <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}" />
+
+      {# Déclarer la traduction seulement si elle est explicitement définie #}
+      {% if translation %}
+        {% set otherLang = "en" if currentLang == "fr" else "fr" %}
+        <link rel="alternate" hreflang="{{ otherLang }}" href="{{ site }}{{ translation }}" />
+      {% endif %}
+
     {% endif %}
 
-    {# Styles #}
+    {# Styles (starter Eleventy) #}
     <style>{% include "css/index.css" %}</style>
     <style>{% getBundle "css" %}</style>
 
     {# Scripts #}
-    <script type="module">
-      {% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}
-    </script>
+    <script type="module">{% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}</script>
   </head>
 
   <body>
@@ -43,13 +60,18 @@
       <div class="topbar">
         <a href="/" class="home-link">{{ metadata.title }}</a>
 
-        {# Language switch (navigation, PAS SEO) #}
-        {% set currentLang = lang or metadata.language or "fr" %}
-        {% set otherLang = "en" if currentLang == "fr" else "fr" %}
-        {% set otherUrl = translation or ("/" + otherLang + "/") %}
+        {# =========================
+           Language switch (navigation)
+           - Utilise `translation` si présent
+           - Sinon fallback vers /fr/ ou /en/
+           ========================= #}
+
+        {% set navLang = lang or metadata.language or "fr" %}
+        {% set otherNavLang = "en" if navLang == "fr" else "fr" %}
+        {% set otherUrl = translation or ("/" + otherNavLang + "/") %}
 
         <nav aria-label="Language switch" class="lang-switch">
-          {% if currentLang == "fr" %}
+          {% if navLang == "fr" %}
             <strong>FR</strong>
             <span> · </span>
             <a href="{{ otherUrl }}" lang="en">EN</a>
@@ -61,7 +83,7 @@
         </nav>
       </div>
 
-      {# Navigation principale #}
+      {# Navigation principale (eleventy-navigation) #}
       <nav>
         <h2 class="visually-hidden">Top level navigation menu</h2>
         <ul class="nav">
@@ -84,10 +106,11 @@
 
     <footer>
       <p>
-        <em>Built with <a href="https://www.11ty.dev/">Eleventy</a></em>
+        <em>Built with <a href="https://www.11ty.dev/">{{ eleventy.generator }}</a></em>
       </p>
     </footer>
 
+    <!-- This page `{{ page.url }}` was built on {% currentBuildDate %} -->
     <script type="module" src="{% getBundleFileUrl "js" %}"></script>
   </body>
 </html>
