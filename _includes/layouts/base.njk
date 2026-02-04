@@ -1,33 +1,93 @@
-<link rel="canonical" href="https://mizan-stance.org{{ page.url }}">
+<!doctype html>
+<html lang="{{ lang or metadata.language }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-{% set site = "https://mizan-stance.org" %}
-{% set p = page.url %}
-{% set currentLang = lang or metadata.language or "fr" %}
+    <title>{{ title or metadata.title }}</title>
+    <meta name="description" content="{{ description or metadata.description }}">
 
-{# x-default partout #}
-<link rel="alternate" hreflang="x-default" href="{{ site }}/" />
+    {# Feed #}
+    <link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="{{ metadata.title }}">
 
-{# Home #}
-{% if p == "/" %}
-  <link rel="alternate" hreflang="fr" href="{{ site }}/fr/" />
-  <link rel="alternate" hreflang="en" href="{{ site }}/en/" />
+    {# Canonical (vérité unique) #}
+    <link rel="canonical" href="https://mizan-stance.org{{ page.url }}">
 
-{% else %}
+    {# --- HREFLANG (site NON miroir, basé sur front-matter) --- #}
+    {% set site = "https://mizan-stance.org" %}
+    {% set currentLang = lang or metadata.language %}
 
-  {# Si la page fournit une traduction explicite, on l’utilise (cas /fr/a-propos/ ↔ /en/about/) #}
-  {% if translation %}
-    <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}" />
-    <link rel="alternate" hreflang="{{ "en" if currentLang == "fr" else "fr" }}" href="{{ site }}{{ translation }}" />
+    {# x-default : seuil neutre #}
+    <link rel="alternate" hreflang="x-default" href="{{ site }}/" />
 
-  {% else %}
-    {# Fallback miroir uniquement si c’est strictement /fr/… ou /en/… #}
-    {% if p.startsWith("/fr/") %}
-      <link rel="alternate" hreflang="fr" href="{{ site }}{{ p }}" />
-      <link rel="alternate" hreflang="en" href="{{ site }}{{ p | replace('/fr/', '/en/') }}" />
-    {% elif p.startsWith("/en/") %}
-      <link rel="alternate" hreflang="en" href="{{ site }}{{ p }}" />
-      <link rel="alternate" hreflang="fr" href="{{ site }}{{ p | replace('/en/', '/fr/') }}" />
+    {# FR / EN uniquement si la page déclare explicitement sa traduction #}
+    {% if translation and currentLang %}
+      <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ page.url }}" />
+      <link rel="alternate" hreflang="{{ "en" if currentLang == "fr" else "fr" }}" href="{{ site }}{{ translation }}" />
     {% endif %}
-  {% endif %}
 
-{% endif %}
+    {# Styles #}
+    <style>{% include "css/index.css" %}</style>
+    <style>{% getBundle "css" %}</style>
+
+    {# Scripts #}
+    <script type="module">
+      {% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" id="skip-link" class="visually-hidden">Skip to main content</a>
+
+    <header>
+      <div class="topbar">
+        <a href="/" class="home-link">{{ metadata.title }}</a>
+
+        {# Language switch (navigation, PAS SEO) #}
+        {% set currentLang = lang or metadata.language or "fr" %}
+        {% set otherLang = "en" if currentLang == "fr" else "fr" %}
+        {% set otherUrl = translation or ("/" + otherLang + "/") %}
+
+        <nav aria-label="Language switch" class="lang-switch">
+          {% if currentLang == "fr" %}
+            <strong>FR</strong>
+            <span> · </span>
+            <a href="{{ otherUrl }}" lang="en">EN</a>
+          {% else %}
+            <a href="{{ otherUrl }}" lang="fr">FR</a>
+            <span> · </span>
+            <strong>EN</strong>
+          {% endif %}
+        </nav>
+      </div>
+
+      {# Navigation principale #}
+      <nav>
+        <h2 class="visually-hidden">Top level navigation menu</h2>
+        <ul class="nav">
+          {%- for entry in collections.all | eleventyNavigation %}
+            <li class="nav-item">
+              <a href="{{ entry.url }}"{% if entry.url == page.url %} aria-current="page"{% endif %}>
+                {{ entry.title }}
+              </a>
+            </li>
+          {%- endfor %}
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <heading-anchors>
+        {{ content | safe }}
+      </heading-anchors>
+    </main>
+
+    <footer>
+      <p>
+        <em>Built with <a href="https://www.11ty.dev/">Eleventy</a></em>
+      </p>
+    </footer>
+
+    <script type="module" src="{% getBundleFileUrl "js" %}"></script>
+  </body>
+</html>
