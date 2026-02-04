@@ -1,40 +1,39 @@
-<!doctype html>
-<html lang="{{ lang or metadata.language or 'fr' }}">
-	<!-- DEBUG-HREFLANG-BASE-NJK -->
-<head>
-		<!-- DEBUG-HREFLANG-BASE-NJK -->
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>{{ title or metadata.title }}</title>
-		<meta name="description" content="{{ description or metadata.description }}" />
+{# ============================
+   CANONICAL + HREFLANG (FR / EN)
+   Source of truth:
+   - page.url
+   - lang (front matter)
+   - translation (front matter, optional)
+   ============================ #}
 
-		{# --- Base URL (canonique) --- #}
-		{% set SITE = metadata.site or "https://mizan-stance.org" %}
+{% set site = "https://mizan-stance.org" %}
+{% set p = page.url %}
+{% set currentLang = lang or metadata.language or "fr" %}
+{% set otherLang = "en" if currentLang == "fr" else "fr" %}
+{% set otherUrl = translation %}
 
-		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="{{ metadata.title }}" />
-		<link rel="canonical" href="{{ SITE }}{{ page.url }}" />
+<link rel="canonical" href="{{ site }}{{ p }}" />
 
-		{# ===========================
-		   HREFLANG (FR/EN) — RÈGLE SIMPLE
-		   - On n'invente pas de miroir.
-		   - Si `translation` existe => on publie le duo FR/EN.
-		   - Sinon => on ne publie que x-default sur la home.
-		   =========================== #}
+<!-- DEBUG-HREFLANG-BASE-NJK
+lang={{ currentLang }}
+page.url={{ p }}
+translation={{ otherUrl or "∅" }}
+-->
 
-		<!-- DEBUG-HREFLANG:START -->
-		{% set p = page.url %}
-		{% set currentLang = lang or metadata.language or "fr" %}
-		{% set otherLang = "en" if currentLang == "fr" else "fr" %}
-		{% set otherUrl = translation %}
-
-		{# Home: annonce FR/EN + x-default #}
-		{% if p == "/" %}
-			<link rel="alternate" hreflang="fr" href="{{ SITE }}/fr/" />
-			<link rel="alternate" hreflang="en" href="{{ SITE }}/en/" />
-			<link rel="alternate" hreflang="x-default" href="{{ SITE }}/" />
-		{% else %}
-
-			{# Toujours self #}
+{% if p == "/" %}
+  <link rel="alternate" hreflang="fr" href="{{ site }}/fr/" />
+  <link rel="alternate" hreflang="en" href="{{ site }}/en/" />
+  <link rel="alternate" hreflang="x-default" href="{{ site }}/" />
+{% else %}
+  {% if otherUrl %}
+    <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}" />
+    <link rel="alternate" hreflang="{{ otherLang }}" href="{{ site }}{{ otherUrl }}" />
+    <link rel="alternate" hreflang="x-default" href="{{ site }}{{ p }}" />
+  {% else %}
+    <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}" />
+    <link rel="alternate" hreflang="x-default" href="{{ site }}{{ p }}" />
+  {% endif %}
+{% endif %}			{# Toujours self #}
 			<link rel="alternate" hreflang="{{ currentLang }}" href="{{ SITE }}{{ p }}" />
 
 			{# Mirror UNIQUEMENT si fourni par front-matter `translation` #}
