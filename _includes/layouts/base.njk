@@ -1,99 +1,33 @@
-<!doctype html>
-<html lang="{{ lang or metadata.language }}">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>{{ title or metadata.title }}</title>
-		<meta name="description" content="{{ description or metadata.description }}">
-		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="{{ metadata.title }}">
 <link rel="canonical" href="https://mizan-stance.org{{ page.url }}">
-		{#- Uncomment this if you’d like folks to know that you used Eleventy to build your site!  #}
-		{#- <meta name="generator" content="{{ eleventy.generator }}"> #}
 
-		{#- Add the contents of a file to the bundle #}
-		<style>{% include "css/index.css" %}</style>
-
-		{#- Render the CSS bundle using inlined CSS (for the fastest site performance in production) #}
-		<style>{% getBundle "css" %}</style>
-
-		{#- Add the heading-anchors web component to the JavaScript bundle #}
-		<script type="module">{% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}</script>
-{# --- HREFLANG (FR/EN) --- #}
 {% set site = "https://mizan-stance.org" %}
 {% set p = page.url %}
+{% set currentLang = lang or metadata.language or "fr" %}
 
-{# Homepage spéciale: propose FR/EN + x-default #}
+{# x-default partout #}
+<link rel="alternate" hreflang="x-default" href="{{ site }}/" />
+
+{# Home #}
 {% if p == "/" %}
   <link rel="alternate" hreflang="fr" href="{{ site }}/fr/" />
   <link rel="alternate" hreflang="en" href="{{ site }}/en/" />
-  <link rel="alternate" hreflang="x-default" href="{{ site }}/" />
+
 {% else %}
 
-  {# Si on est déjà dans /fr/ -> sister EN #}
-  {% if p.startsWith("/fr/") %}
-    <link rel="alternate" hreflang="fr" href="{{ site }}{{ p }}" />
-    <link rel="alternate" hreflang="en" href="{{ site }}{{ p | replace('/fr/', '/en/') }}" />
-  {% elif p.startsWith("/en/") %}
-    <link rel="alternate" hreflang="en" href="{{ site }}{{ p }}" />
-    <link rel="alternate" hreflang="fr" href="{{ site }}{{ p | replace('/en/', '/fr/') }}" />
+  {# Si la page fournit une traduction explicite, on l’utilise (cas /fr/a-propos/ ↔ /en/about/) #}
+  {% if translation %}
+    <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}" />
+    <link rel="alternate" hreflang="{{ "en" if currentLang == "fr" else "fr" }}" href="{{ site }}{{ translation }}" />
+
+  {% else %}
+    {# Fallback miroir uniquement si c’est strictement /fr/… ou /en/… #}
+    {% if p.startsWith("/fr/") %}
+      <link rel="alternate" hreflang="fr" href="{{ site }}{{ p }}" />
+      <link rel="alternate" hreflang="en" href="{{ site }}{{ p | replace('/fr/', '/en/') }}" />
+    {% elif p.startsWith("/en/") %}
+      <link rel="alternate" hreflang="en" href="{{ site }}{{ p }}" />
+      <link rel="alternate" hreflang="fr" href="{{ site }}{{ p | replace('/en/', '/fr/') }}" />
+    {% endif %}
   {% endif %}
 
 {% endif %}
-	</head>
-
-	<body>
-		<a href="#main" id="skip-link" class="visually-hidden">Skip to main content</a>
-
-		<header>
-			<div class="topbar">
-				<a href="/" class="home-link">{{ metadata.title }}</a>
-
-				{#- Smart language switch: uses `translation` when present, otherwise falls back to /fr/ or /en/ #}
-				{% set currentLang = lang or metadata.language or "fr" %}
-				{% set otherLang = "en" if currentLang == "fr" else "fr" %}
-				{% set otherUrl = translation or ("/" + otherLang + "/") %}
-
-				<nav aria-label="Language switch" class="lang-switch">
-					{% if currentLang == "fr" %}
-						<strong>FR</strong>
-						<span> · </span>
-						<a href="{{ otherUrl }}" hreflang="en" lang="en">EN</a>
-					{% else %}
-						<a href="{{ otherUrl }}" hreflang="fr" lang="fr">FR</a>
-						<span> · </span>
-						<strong>EN</strong>
-					{% endif %}
-				</nav>
-			</div>
-
-			{#- Top navigation driven by eleventy-navigation #}
-			<nav>
-				<h2 class="visually-hidden">Top level navigation menu</h2>
-				<ul class="nav">
-				{%- for entry in collections.all | eleventyNavigation %}
-					<li class="nav-item">
-						<a href="{{ entry.url }}"{% if entry.url == page.url %} aria-current="page"{% endif %}>
-							{{ entry.title }}
-						</a>
-					</li>
-				{%- endfor %}
-				</ul>
-			</nav>
-		</header>
-
-		<main id="main">
-			<heading-anchors>
-				{{ content | safe }}
-			</heading-anchors>
-		</main>
-
-		<footer>
-			<p>
-				<em>Built with <a href="https://www.11ty.dev/">{{ eleventy.generator }}</a></em>
-			</p>
-		</footer>
-
-		<!-- This page `{{ page.url }}` was built on {% currentBuildDate %} -->
-		<script type="module" src="{% getBundleFileUrl "js" %}"></script>
-	</body>
-</html>
