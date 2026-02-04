@@ -1,4 +1,42 @@
-/* Defaults */
+<!doctype html>
+<html lang="fr">
+	<!-- DEBUG-HREFLANG-BASE-NJK -->
+<head>
+		<!-- DEBUG-HREFLANG-BASE-NJK -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>À propos</title>
+		<meta name="description" content="Un territoire situé. Ici, les mots ne décorent pas : ils orientent.">
+
+		
+		
+
+		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="Mizan — Cartographie de veille">
+		<link rel="canonical" href="https://mizan-stance.org/fr/a-propos/">
+
+		
+
+		<!-- DEBUG-HREFLANG:START -->
+		
+		
+		
+		
+
+		
+		
+
+			
+			<link rel="alternate" hreflang="fr" href="https://mizan-stance.org/fr/a-propos/">
+
+			
+			
+				<link rel="alternate" hreflang="en" href="https://mizan-stance.org/en/about/">
+			
+
+		
+		<!-- DEBUG-HREFLANG:END -->
+		
+		<style>/* Defaults */
 :root {
 	--font-family: -apple-system, system-ui, sans-serif;
 	--font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono, Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono, Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New, Courier, monospace;
@@ -41,6 +79,10 @@
 	box-sizing: border-box;
 }
 
+@view-transition {
+	navigation: auto;
+}
+
 html,
 body {
 	padding: 0;
@@ -57,7 +99,7 @@ body {
 }
 
 /* https://www.a11yproject.com/posts/how-to-hide-content/ */
-.visually-hidden {
+.visually-hidden:not(:focus):not(:active) {
 	clip: rect(0 0 0 0);
 	clip-path: inset(50%);
 	height: 1px;
@@ -65,6 +107,27 @@ body {
 	position: absolute;
 	white-space: nowrap;
 	width: 1px;
+}
+
+/* Fluid images via https://www.zachleat.com/web/fluid-images/ */
+img{
+  max-width: 100%;
+}
+img[width][height] {
+  height: auto;
+}
+img[src$=".svg"] {
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+video,
+iframe {
+	width: 100%;
+	height: auto;
+}
+iframe {
+	aspect-ratio: 16/9;
 }
 
 p:last-child {
@@ -89,7 +152,8 @@ a[href]:active {
 	color: var(--text-color-link-active);
 }
 
-main {
+main,
+footer {
 	padding: 1rem;
 }
 main :first-child {
@@ -99,16 +163,38 @@ main :first-child {
 header {
 	border-bottom: 1px dashed var(--color-gray-20);
 }
-header:after {
-	content: "";
-	display: table;
-	clear: both;
+
+#skip-link {
+	text-decoration: none;
+	background: var(--background-color);
+	color: var(--text-color);
+	padding: 0.5rem 1rem;
+	border: 1px solid var(--color-gray-90);
+	border-radius: 2px;
+}
+
+/* Prevent visually-hidden skip link fom pushing content around when focused */
+#skip-link.visually-hidden:focus {
+	position: absolute;
+	top: 1rem;
+	left: 1rem;
+	/* Ensure it is positioned on top of everything else when it is shown */
+	z-index: 999;
 }
 
 .links-nextprev {
-	list-style: none;
+	display: flex;
+	justify-content: space-between;
+	gap: .5em 1em;
+	list-style: "";
 	border-top: 1px dashed var(--color-gray-20);
 	padding: 1em 0;
+}
+.links-nextprev > * {
+	flex-grow: 1;
+}
+.links-nextprev-next {
+	text-align: right;
 }
 
 table {
@@ -137,6 +223,7 @@ pre:not([class*="language-"]) {
 	white-space: pre;
 	word-spacing: normal;
 	word-break: normal;
+	overflow-x: auto;
 }
 code {
 	word-break: break-all;
@@ -145,15 +232,16 @@ code {
 /* Header */
 header {
 	display: flex;
-	gap: 1em .5em;
+	gap: 1em;
 	flex-wrap: wrap;
+	justify-content: space-between;
 	align-items: center;
 	padding: 1em;
 }
 .home-link {
+	flex-grow: 1;
 	font-size: 1em; /* 16px /16 */
 	font-weight: 700;
-	margin-right: 2em;
 }
 .home-link:link:not(:hover) {
 	text-decoration: none;
@@ -162,13 +250,13 @@ header {
 /* Nav */
 .nav {
 	display: flex;
+	gap: .5em 1em;
 	padding: 0;
 	margin: 0;
 	list-style: none;
 }
 .nav-item {
 	display: inline-block;
-	margin-right: 1em;
 }
 .nav-item a[href]:not(:hover) {
 	text-decoration: none;
@@ -179,6 +267,7 @@ header {
 
 /* Posts list */
 .postlist {
+	counter-reset: start-from var(--postlist-index);
 	list-style: none;
 	padding: 0;
 	padding-left: 1.5rem;
@@ -244,27 +333,96 @@ header {
 .post-metadata time {
 	margin-right: 1em;
 }
-
-/* Direct Links / Markdown Headers */
-.header-anchor {
-	text-decoration: none;
-	font-style: normal;
-	font-size: 1em;
-	margin-left: .1em;
-}
-a[href].header-anchor,
-a[href].header-anchor:visited {
-	color: transparent;
-}
-a[href].header-anchor:focus,
-a[href].header-anchor:hover {
-	text-decoration: underline;
-}
-a[href].header-anchor:focus,
-:hover > a[href].header-anchor {
-	color: #aaa;
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-h2 + .header-anchor {
-	font-size: 1.5em;
+.lang-switch a {
+  margin-left: .5rem;
+  text-decoration: none;
+  opacity: .75;
 }
+
+.lang-switch a[aria-current="page"] {
+  opacity: 1;
+  text-decoration: underline;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.lang-switch {
+  font-size: 0.95rem;
+}
+
+.lang-switch a {
+  text-decoration: underline;
+}</style>
+		
+	</head>
+
+	<body>
+		<a href="#main" id="skip-link" class="visually-hidden">Skip to main content</a>
+
+		<header>
+			<div class="topbar">
+				<a href="/" class="home-link">Mizan — Cartographie de veille</a>
+
+				
+				<nav aria-label="Language switch" class="lang-switch">
+					
+						<strong>FR</strong>
+						<span> · </span>
+						
+							<a href="/en/about/" hreflang="en" lang="en">EN</a>
+						
+					
+				</nav>
+			</div>
+			<nav>
+				<h2 class="visually-hidden" id="top-level-navigation-menu">Top level navigation menu</h2>
+				<ul class="nav">
+					<li class="nav-item">
+						<a href="/blog/">
+							Archive
+						</a>
+					</li>
+					<li class="nav-item">
+						<a href="/about/">
+							About
+						</a>
+					</li>
+					<li class="nav-item">
+						<a href="/feed/feed.xml">
+							Feed
+						</a>
+					</li>
+				</ul>
+			</nav>
+		</header>
+
+		<main id="main">
+			<heading-anchors>
+				<p>Ce projet est une cartographie de la veille.<br>
+Un territoire conscient.<br>
+Une manière de rester orienté dans la complexité.</p>
+
+			</heading-anchors>
+		</main>
+
+		<footer>
+			<p>
+				<em>Built with <a href="https://www.11ty.dev/">Eleventy v3.1.2</a></em>
+			</p>
+		</footer>
+
+		<!-- This page `/fr/a-propos/` was built on 2026-02-04T20:41:14.572Z -->
+		<script type="module" src="/dist/cC8wS6ZjFU.js"></script>
+	</body>
+</html>
