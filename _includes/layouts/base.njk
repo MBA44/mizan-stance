@@ -1,61 +1,59 @@
 <!doctype html>
-<html lang="{{ lang or metadata.language or 'fr' }}">
+<html lang="{{ lang | default(metadata.language, true) }}">
 <head>
-<!-- DEBUG-HREFLANG-BASE-NJK -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>{{ title or metadata.title }}</title>
   <meta name="description" content="{{ description or metadata.description }}">
 
-  {# ==============================
+  {# =========================
      CANONICAL
-     ============================== #}
-  <link rel="canonical" href="https://mizan-stance.org{{ page.url }}">
+     ========================= #}
+  {% set site = "https://mizan-stance.org" %}
+  <link rel="canonical" href="{{ site }}{{ page.url }}">
 
-  {# ==============================
-     FEED
-     ============================== #}
-  <link rel="alternate"
-        type="application/atom+xml"
-        href="/feed/feed.xml"
-        title="{{ metadata.title }}">
-
-  {# ==============================
-     HREFLANG — SOURCE DE VÉRITÉ
-     ============================== #}
+  {# =========================
+     HREFLANG — SOURCE UNIQUE
+     Basé uniquement sur :
+     - lang
+     - permalink (page.url)
+     - translation
+     ========================= #}
 
   <!-- DEBUG-HREFLANG-BASE-NJK -->
-  {% set site = "https://mizan-stance.org" %}
-
-  {# langue courante #}
-  <link rel="alternate"
-        hreflang="{{ lang }}"
-        href="{{ site }}{{ page.url }}">
-
-  {# langue sœur si déclarée #}
-  {% if translation %}
+  {% if lang and translation %}
     <link rel="alternate"
-          hreflang="{{ 'en' if lang == 'fr' else 'fr' }}"
+          hreflang="{{ lang }}"
+          href="{{ site }}{{ page.url }}">
+
+    <link rel="alternate"
+          hreflang="{{ lang == 'fr' ? 'en' : 'fr' }}"
           href="{{ site }}{{ translation }}">
   {% endif %}
 
   {# x-default uniquement pour la home #}
   {% if page.url == "/" %}
-    <link rel="alternate"
-          hreflang="x-default"
-          href="{{ site }}/">
+    <link rel="alternate" hreflang="x-default" href="{{ site }}/">
   {% endif %}
 
-  {# ==============================
+  {# =========================
+     FEED
+     ========================= #}
+  <link rel="alternate"
+        href="/feed/feed.xml"
+        type="application/atom+xml"
+        title="{{ metadata.title }}">
+
+  {# =========================
      STYLES
-     ============================== #}
+     ========================= #}
   <style>{% include "css/index.css" %}</style>
   <style>{% getBundle "css" %}</style>
 
-  {# ==============================
+  {# =========================
      SCRIPTS
-     ============================== #}
+     ========================= #}
   <script type="module">
     {% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}
   </script>
@@ -68,39 +66,35 @@
 
   <header>
     <div class="topbar">
-      <a href="/" class="home-link">
-        {{ metadata.title }}
-      </a>
+      <a href="/" class="home-link">{{ metadata.title }}</a>
 
-      {# ==============================
+      {# =========================
          LANGUAGE SWITCH (UI)
-         ============================== #}
-      <nav aria-label="Language switch" class="lang-switch">
-        {% if lang == "fr" %}
-          <strong>FR</strong> ·
-          {% if translation %}
+         ========================= #}
+      {% if lang and translation %}
+        <nav aria-label="Language switch" class="lang-switch">
+          {% if lang == "fr" %}
+            <strong>FR</strong> ·
             <a href="{{ translation }}" hreflang="en" lang="en">EN</a>
+          {% else %}
+            <a href="{{ translation }}" hreflang="fr" lang="fr">FR</a> ·
+            <strong>EN</strong>
           {% endif %}
-        {% else %}
-          {% if translation %}
-            <a href="{{ translation }}" hreflang="fr" lang="fr">FR</a>
-          {% endif %}
-          · <strong>EN</strong>
-        {% endif %}
-      </nav>
+        </nav>
+      {% endif %}
     </div>
 
     <nav>
-      <h2 class="visually-hidden">Top level navigation menu</h2>
+      <h2 class="visually-hidden">Top level navigation</h2>
       <ul class="nav">
-        {%- for entry in collections.all | eleventyNavigation %}
+        {% for entry in collections.all | eleventyNavigation %}
           <li class="nav-item">
             <a href="{{ entry.url }}"
                {% if entry.url == page.url %}aria-current="page"{% endif %}>
               {{ entry.title }}
             </a>
           </li>
-        {%- endfor %}
+        {% endfor %}
       </ul>
     </nav>
   </header>
@@ -114,14 +108,13 @@
   <footer>
     <p>
       <em>
-        Built with <a href="https://www.11ty.dev/">
-          {{ eleventy.generator }}
-        </a>
+        Built with
+        <a href="https://www.11ty.dev/">{{ eleventy.generator }}</a>
       </em>
     </p>
   </footer>
 
-  <!-- This page {{ page.url }} was built on {% currentBuildDate %} -->
+  <!-- Page: {{ page.url }} -->
   <script type="module" src="{% getBundleFileUrl "js" %}"></script>
 </body>
 </html>
