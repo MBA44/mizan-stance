@@ -1,100 +1,126 @@
 <!doctype html>
-<html lang="{{ page.data.lang or metadata.language or 'fr' }}">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="{{ lang or metadata.language or 'fr' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ title or metadata.title }}</title>
-    <meta name="description" content="{{ description or metadata.description }}">
+  <title>{{ title or metadata.title }}</title>
+  <meta name="description" content="{{ description or metadata.description }}">
 
-    <link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="{{ metadata.title }}">
+  {# ==============================
+     CANONICAL
+     ============================== #}
+  <link rel="canonical" href="https://mizan-stance.org{{ page.url }}">
 
-    <link rel="canonical" href="https://mizan-stance.org{{ page.url }}">
+  {# ==============================
+     FEED
+     ============================== #}
+  <link rel="alternate"
+        type="application/atom+xml"
+        href="/feed/feed.xml"
+        title="{{ metadata.title }}">
 
-    <!-- DEBUG-HREFLANG-BASE-NJK -->
+  {# ==============================
+     HREFLANG — SOURCE DE VÉRITÉ
+     ============================== #}
 
-    {# =========================
-       HREFLANG (FR/EN) — ROBUSTE
-       ========================= #}
+  <!-- DEBUG-HREFLANG-BASE-NJK -->
+  {% set site = "https://mizan-stance.org" %}
 
-    {% set site = "https://mizan-stance.org" %}
-    {% set p = page.url %}
-    {% set currentLang = page.data.lang or metadata.language or "fr" %}
-    {% set translationUrl = page.data.translation %}
+  {# langue courante #}
+  <link rel="alternate"
+        hreflang="{{ lang }}"
+        href="{{ site }}{{ page.url }}">
 
-    <link rel="alternate" hreflang="x-default" href="{{ site }}/" />
+  {# langue sœur si déclarée #}
+  {% if translation %}
+    <link rel="alternate"
+          hreflang="{{ 'en' if lang == 'fr' else 'fr' }}"
+          href="{{ site }}{{ translation }}">
+  {% endif %}
 
-    {% if p == "/" %}
-      <link rel="alternate" hreflang="fr" href="{{ site }}/fr/" />
-      <link rel="alternate" hreflang="en" href="{{ site }}/en/" />
-      <link rel="alternate" hreflang="x-default" href="{{ site }}/" />
-    {% else %}
-      <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}" />
-      {% if translationUrl %}
-        {% set otherLang = "en" if currentLang == "fr" else "fr" %}
-        <link rel="alternate" hreflang="{{ otherLang }}" href="{{ site }}{{ translationUrl }}" />
-      {% endif %}
-    {% endif %}
+  {# x-default uniquement pour la home #}
+  {% if page.url == "/" %}
+    <link rel="alternate"
+          hreflang="x-default"
+          href="{{ site }}/">
+  {% endif %}
 
-    <style>{% include "css/index.css" %}</style>
-    <style>{% getBundle "css" %}</style>
+  {# ==============================
+     STYLES
+     ============================== #}
+  <style>{% include "css/index.css" %}</style>
+  <style>{% getBundle "css" %}</style>
 
-    <script type="module">
-      {% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}
-    </script>
-  </head>
+  {# ==============================
+     SCRIPTS
+     ============================== #}
+  <script type="module">
+    {% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}
+  </script>
+</head>
 
-  <body>
-    <a href="#main" id="skip-link" class="visually-hidden">Skip to main content</a>
+<body>
+  <a href="#main" id="skip-link" class="visually-hidden">
+    Skip to main content
+  </a>
 
-    <header>
-      <div class="topbar">
-        <a href="/" class="home-link">{{ metadata.title }}</a>
+  <header>
+    <div class="topbar">
+      <a href="/" class="home-link">
+        {{ metadata.title }}
+      </a>
 
-        {% set navLang = page.data.lang or metadata.language or "fr" %}
-        {% set otherNavLang = "en" if navLang == "fr" else "fr" %}
-        {% set otherUrl = page.data.translation or ("/" + otherNavLang + "/") %}
-
-        <nav aria-label="Language switch" class="lang-switch">
-          {% if navLang == "fr" %}
-            <strong>FR</strong>
-            <span> · </span>
-            <a href="{{ otherUrl }}" lang="en">EN</a>
-          {% else %}
-            <a href="{{ otherUrl }}" lang="fr">FR</a>
-            <span> · </span>
-            <strong>EN</strong>
+      {# ==============================
+         LANGUAGE SWITCH (UI)
+         ============================== #}
+      <nav aria-label="Language switch" class="lang-switch">
+        {% if lang == "fr" %}
+          <strong>FR</strong> ·
+          {% if translation %}
+            <a href="{{ translation }}" hreflang="en" lang="en">EN</a>
           {% endif %}
-        </nav>
-      </div>
-
-      <nav>
-        <h2 class="visually-hidden">Top level navigation menu</h2>
-        <ul class="nav">
-          {%- for entry in collections.all | eleventyNavigation %}
-            <li class="nav-item">
-              <a href="{{ entry.url }}"{% if entry.url == page.url %} aria-current="page"{% endif %}>
-                {{ entry.title }}
-              </a>
-            </li>
-          {%- endfor %}
-        </ul>
+        {% else %}
+          {% if translation %}
+            <a href="{{ translation }}" hreflang="fr" lang="fr">FR</a>
+          {% endif %}
+          · <strong>EN</strong>
+        {% endif %}
       </nav>
-    </header>
+    </div>
 
-    <main id="main">
-      <heading-anchors>
-        {{ content | safe }}
-      </heading-anchors>
-    </main>
+    <nav>
+      <h2 class="visually-hidden">Top level navigation menu</h2>
+      <ul class="nav">
+        {%- for entry in collections.all | eleventyNavigation %}
+          <li class="nav-item">
+            <a href="{{ entry.url }}"
+               {% if entry.url == page.url %}aria-current="page"{% endif %}>
+              {{ entry.title }}
+            </a>
+          </li>
+        {%- endfor %}
+      </ul>
+    </nav>
+  </header>
 
-    <footer>
-      <p>
-        <em>Built with <a href="https://www.11ty.dev/">{{ eleventy.generator }}</a></em>
-      </p>
-    </footer>
+  <main id="main">
+    <heading-anchors>
+      {{ content | safe }}
+    </heading-anchors>
+  </main>
 
-    <!-- This page `{{ page.url }}` was built on {% currentBuildDate %} -->
-    <script type="module" src="{% getBundleFileUrl "js" %}"></script>
-  </body>
+  <footer>
+    <p>
+      <em>
+        Built with <a href="https://www.11ty.dev/">
+          {{ eleventy.generator }}
+        </a>
+      </em>
+    </p>
+  </footer>
+
+  <!-- This page {{ page.url }} was built on {% currentBuildDate %} -->
+  <script type="module" src="{% getBundleFileUrl "js" %}"></script>
+</body>
 </html>
