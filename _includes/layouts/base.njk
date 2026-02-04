@@ -2,7 +2,7 @@
 <html lang="{{ lang or metadata.language or 'fr' }}">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>{{ title }}</title>
   {% if description %}
@@ -21,13 +21,12 @@
 
   <link rel="canonical" href="{{ site }}{{ p }}">
 
-  <!-- DEBUG-HREFLANG-BASE-NJK
+  <!-- DEBUG-HREFLANG
   lang={{ currentLang }}
   page.url={{ p }}
   translation={{ otherUrl or "∅" }}
   -->
 
-  {# Homepage #}
   {% if p == "/" %}
     <link rel="alternate" hreflang="fr" href="{{ site }}/fr/">
     <link rel="alternate" hreflang="en" href="{{ site }}/en/">
@@ -43,7 +42,10 @@
     {% endif %}
   {% endif %}
 
-  <link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="Mizan – Cartographie de veille">
+  <link rel="alternate"
+        href="/feed/feed.xml"
+        type="application/atom+xml"
+        title="Mizan – Cartographie de veille">
 
   <style>
     :root {
@@ -59,8 +61,6 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --color-gray-20: #e0e0e0;
-        --color-gray-50: #c0c0c0;
         --color-gray-90: #dad8d8;
         --background-color: #15202b;
         --text-color-link: #1493fb;
@@ -69,37 +69,21 @@
       }
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
-      padding: 0;
       margin: 0 auto;
       max-width: 40em;
       font-family: system-ui, sans-serif;
       color: var(--text-color);
-      background-color: var(--background-color);
-      overflow-y: scroll;
+      background: var(--background-color);
     }
 
-    img {
-      max-width: 100%;
-      height: auto;
-    }
+    img { max-width: 100%; height: auto; }
 
-    a {
-      color: var(--text-color-link);
-    }
-
-    a:visited {
-      color: var(--text-color-link-visited);
-    }
-
-    a:hover,
-    a:active {
-      color: var(--text-color-link-active);
-    }
+    a { color: var(--text-color-link); }
+    a:visited { color: var(--text-color-link-visited); }
+    a:hover, a:active { color: var(--text-color-link-active); }
   </style>
 </head>
 
@@ -108,160 +92,4 @@
     {{ content | safe }}
   </main>
 </body>
-</html>		lang={{ currentLang }}
-		page.url={{ p }}
-		translation={{ otherUrl or "∅" }}
-		-->
-
-		{% if p == "/" %}
-			<link rel="alternate" hreflang="fr" href="{{ site }}/fr/">
-			<link rel="alternate" hreflang="en" href="{{ site }}/en/">
-			<link rel="alternate" hreflang="x-default" href="{{ site }}/">
-		{% else %}
-			{% if otherUrl %}
-				<link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}">
-				<link rel="alternate" hreflang="{{ otherLang }}" href="{{ site }}{{ otherUrl }}">
-				<link rel="alternate" hreflang="x-default" href="{{ site }}{{ p }}">
-			{% else %}
-				<link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}">
-				<link rel="alternate" hreflang="x-default" href="{{ site }}{{ p }}">
-			{% endif %}
-		{% endif %}
-	</head>
-
-	<body>
-		<a href="#main" id="skip-link" class="visually-hidden">Skip to main content</a>
-
-		<header>
-			<div class="topbar">
-				<a href="/" class="home-link">{{ metadata.title }}</a>
-
-				{#- Smart language switch: uses `translation` when present, otherwise falls back to /fr/ or /en/ #}
-				{% set otherUrlForSwitch = otherUrl or ("/" + otherLang + "/") %}
-
-				<nav aria-label="Language switch" class="lang-switch">
-					{% if currentLang == "fr" %}
-						<strong>FR</strong>
-						<span> · </span>
-						<a href="{{ otherUrlForSwitch }}" hreflang="en" lang="en">EN</a>
-					{% else %}
-						<a href="{{ otherUrlForSwitch }}" hreflang="fr" lang="fr">FR</a>
-						<span> · </span>
-						<strong>EN</strong>
-					{% endif %}
-				</nav>
-			</div>
-
-			{#- Top navigation driven by eleventy-navigation #}
-			<nav>
-				<h2 class="visually-hidden">Top level navigation menu</h2>
-				<ul class="nav">
-				{%- for entry in collections.all | eleventyNavigation %}
-					<li class="nav-item">
-						<a href="{{ entry.url }}"{% if entry.url == page.url %} aria-current="page"{% endif %}>
-							{{ entry.title }}
-						</a>
-					</li>
-				{%- endfor %}
-				</ul>
-			</nav>
-		</header>
-
-		<main id="main">
-			<heading-anchors>
-				{{ content | safe }}
-			</heading-anchors>
-		</main>
-
-		<footer>
-			<p>
-				<em>Built with <a href="https://www.11ty.dev/">{{ eleventy.generator }}</a></em>
-			</p>
-		</footer>
-
-		<!-- This page `{{ page.url }}` was built on {% currentBuildDate %} -->
-		<script type="module" src="{% getBundleFileUrl "js" %}"></script>
-	</body>
-</html>			<link rel="alternate" hreflang="{{ currentLang }}" href="{{ SITE }}{{ p }}" />
-
-			{# Mirror UNIQUEMENT si fourni par front-matter `translation` #}
-			{% if otherUrl %}
-				<link rel="alternate" hreflang="{{ otherLang }}" href="{{ SITE }}{{ otherUrl }}" />
-			{% endif %}
-
-		{% endif %}
-		<!-- DEBUG-HREFLANG:END -->
-
-		{#- Uncomment this if you’d like folks to know that you used Eleventy to build your site!  #}
-		{#- <meta name="generator" content="{{ eleventy.generator }}"> #}
-
-		{#- Add the contents of a file to the bundle #}
-		<style>{% include "css/index.css" %}</style>
-
-		{#- Render the CSS bundle using inlined CSS (for the fastest site performance in production) #}
-		<style>{% getBundle "css" %}</style>
-
-		{#- Add the heading-anchors web component to the JavaScript bundle #}
-		<script type="module">{% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}</script>
-	</head>
-
-	<body>
-		<a href="#main" id="skip-link" class="visually-hidden">Skip to main content</a>
-
-		<header>
-			<div class="topbar">
-				<a href="/" class="home-link">{{ metadata.title }}</a>
-
-				{# --- Language switch uses `translation` if present --- #}
-				<nav aria-label="Language switch" class="lang-switch">
-					{% if currentLang == "fr" %}
-						<strong>FR</strong>
-						<span> · </span>
-						{% if otherUrl %}
-							<a href="{{ otherUrl }}" hreflang="en" lang="en">EN</a>
-						{% else %}
-							<span style="opacity:.6">EN</span>
-						{% endif %}
-					{% else %}
-						{% if otherUrl %}
-							<a href="{{ otherUrl }}" hreflang="fr" lang="fr">FR</a>
-						{% else %}
-							<span style="opacity:.6">FR</span>
-						{% endif %}
-						<span> · </span>
-						<strong>EN</strong>
-					{% endif %}
-				</nav>
-			</div>
-
-			{#- Top navigation driven by eleventy-navigation #}
-			<nav>
-				<h2 class="visually-hidden">Top level navigation menu</h2>
-				<ul class="nav">
-				{%- for entry in collections.all | eleventyNavigation %}
-					<li class="nav-item">
-						<a href="{{ entry.url }}"{% if entry.url == page.url %} aria-current="page"{% endif %}>
-							{{ entry.title }}
-						</a>
-					</li>
-				{%- endfor %}
-				</ul>
-			</nav>
-		</header>
-
-		<main id="main">
-			<heading-anchors>
-				{{ content | safe }}
-			</heading-anchors>
-		</main>
-
-		<footer>
-			<p>
-				<em>Built with <a href="https://www.11ty.dev/">{{ eleventy.generator }}</a></em>
-			</p>
-		</footer>
-
-		<!-- This page `{{ page.url }}` was built on {% currentBuildDate %} -->
-		<script type="module" src="{% getBundleFileUrl "js" %}"></script>
-	</body>
 </html>
