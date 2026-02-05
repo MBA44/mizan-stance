@@ -1,64 +1,45 @@
-import { DateTime } from "luxon";
+const { DateTime } = require("luxon");
 
-export default function (eleventyConfig) {
+module.exports = function (eleventyConfig) {
+  // -----------------
+  // Filters
+  // -----------------
 
-  /* ----------------------------------------
-   * PASSTHROUGH COPY
-   * -------------------------------------- */
-  eleventyConfig.addPassthroughCopy({ "content/img": "img" });
-  eleventyConfig.addPassthroughCopy("content/robots.txt");
-
-  /* ----------------------------------------
-   * FILTERS — DATES
-   * -------------------------------------- */
   eleventyConfig.addFilter("htmlDateString", (dateObj) => {
     return DateTime.fromJSDate(dateObj, { zone: "utc" }).toFormat("yyyy-LL-dd");
   });
 
-  /* ----------------------------------------
-   * FILTERS — URLS
-   * -------------------------------------- */
-  eleventyConfig.addFilter("htmlBaseUrl", (url, base) => {
-    if (!base) return url;
-    return new URL(url, base).toString();
+  eleventyConfig.addFilter("htmlBaseUrl", (url) => {
+    if (!url) return "";
+    return url.replace(/\/index\.html$/, "/");
   });
 
-  /* ----------------------------------------
-   * FILTERS — SORTING
-   * -------------------------------------- */
   eleventyConfig.addFilter("sortAlphabetically", (arr) => {
-    if (!Array.isArray(arr)) return arr;
-
-    return [...arr].sort((a, b) => {
-      const A =
-        typeof a === "string"
-          ? a
-          : (a && (a.title || a.name || a.slug || a.tag)) || String(a);
-      const B =
-        typeof b === "string"
-          ? b
-          : (b && (b.title || b.name || b.slug || b.tag)) || String(b);
-
-      return String(A).localeCompare(String(B), "en", { sensitivity: "base" });
-    });
+    return arr.slice().sort((a, b) => a.localeCompare(b));
   });
 
-  /* ----------------------------------------
-   * LAYOUT ALIAS
-   * -------------------------------------- */
-  eleventyConfig.addLayoutAlias("base", "layouts/base.njk");
+  // -----------------
+  // Layout aliases
+  // -----------------
 
-  /* ----------------------------------------
-   * ELEVENTY CONFIG
-   * -------------------------------------- */
+  eleventyConfig.addLayoutAlias("base", "layouts/base.njk");
+  eleventyConfig.addLayoutAlias("home", "layouts/home.njk");
+  eleventyConfig.addLayoutAlias("post", "layouts/post.njk");
+
+  // -----------------
+  // Passthrough
+  // -----------------
+
+  eleventyConfig.addPassthroughCopy("img");
+
   return {
     dir: {
       input: "content",
-      includes: "_includes",
-      data: "_data",
-      output: "_site"
+      includes: "../_includes",
+      data: "../_data",
+      output: "_site",
     },
     markdownTemplateEngine: "njk",
-    htmlTemplateEngine: "njk"
+    htmlTemplateEngine: "njk",
   };
-}
+};
