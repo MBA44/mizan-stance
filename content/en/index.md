@@ -1,5 +1,5 @@
 ---
-layout: base
+layout: layouts/base.njk
 title: Mizan — EN
 permalink: /en/
 ---
