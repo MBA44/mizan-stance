@@ -1,36 +1,17 @@
-const { DateTime } = require("luxon");
-
+/** @param {import("@11ty/eleventy").UserConfig} eleventyConfig */
 module.exports = function (eleventyConfig) {
-
-  /* =========================
-     PASSTHROUGH
-     ========================= */
-
-  eleventyConfig.addPassthroughCopy("css");
-  eleventyConfig.addPassthroughCopy("public");
+  // Passthrough (si tu as des assets statiques)
   eleventyConfig.addPassthroughCopy({ "public/img": "img" });
 
-  /* =========================
-     FILTERS
-     ========================= */
-
-  eleventyConfig.addFilter("readableDate", (dateObj) => {
-    return DateTime.fromJSDate(dateObj, { zone: "utc" }).toFormat("dd LLL yyyy");
-  });
-
-  eleventyConfig.addFilter("htmlDateString", (dateObj) => {
-    return DateTime.fromJSDate(dateObj, { zone: "utc" }).toISODate();
-  });
-
-  /* =========================
-     COLLECTIONS
-     ========================= */
-
-  eleventyConfig.addCollection("posts", function (collectionApi) {
-    return collectionApi.getFilteredByGlob("content/blog/*.md");
-  });
-
-  /* =========================
-     MARKDOWN
-     ========================= */
-
+  return {
+    dir: {
+      input: "content",
+      includes: "../_includes",
+      data: "../_data",
+      output: "_site",
+    },
+    markdownTemplateEngine: "njk",
+    htmlTemplateEngine: "njk",
+    templateFormats: ["md", "njk", "html"],
+  };
+};
