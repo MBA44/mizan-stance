@@ -1,12 +1,16 @@
 ---
-title: "Cartography of Vigilance"
-lang: en
-layout: layouts/home.njk
+layout: base
+title: Mizan — English
 permalink: /en/
-lastmod: 2026-02-04
 ---
 
-Welcome to **Mizan**.
+## Enter in English
 
-This is the English entry point.  
-A situated territory. Words don’t decorate — they orient.
+This space gathers texts written in English.  
+Essays, fragments, and observational notes.  
+Reading may be partial or continuous.  
+Nothing demands agreement.  
+Attention is the only requirement.
+
+- [Read texts](/en/blog/)
+- [About](/en/about/)
