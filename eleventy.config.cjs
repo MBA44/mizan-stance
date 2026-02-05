@@ -1,7 +1,14 @@
-/** @param {import("@11ty/eleventy").UserConfig} eleventyConfig */
 module.exports = function (eleventyConfig) {
-  // Passthrough (si tu as des assets statiques)
-  eleventyConfig.addPassthroughCopy({ "public/img": "img" });
+
+  const { URL } = require("url");
+
+  eleventyConfig.addFilter("htmlBaseUrl", function (url, base) {
+    try {
+      return new URL(url, base).toString();
+    } catch (e) {
+      return url;
+    }
+  });
 
   return {
     dir: {
@@ -10,8 +17,5 @@ module.exports = function (eleventyConfig) {
       data: "../_data",
       output: "_site",
     },
-    markdownTemplateEngine: "njk",
-    htmlTemplateEngine: "njk",
-    templateFormats: ["md", "njk", "html"],
   };
 };
