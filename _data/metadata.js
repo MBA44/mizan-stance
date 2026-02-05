@@ -1,9 +1,9 @@
-module.exports = {
-  title: "Mizan – Cartographie du réel",
+export default {
+  title: "Mizan — Cartographie du réel",
   url: "https://mizan-stance.org",
   language: "fr",
-  description: "Un territoire silencieux de veille, d’écriture et de cartographie du réel.",
+  description: "Un territoire situé. Ici, les mots ne décorent pas : ils orientent.",
   author: {
-    name: "M’bark Afroukh"
-  }
+    name: "M’bark Afroukh",
+  },
 };
