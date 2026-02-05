@@ -10,6 +10,8 @@ module.exports = function (eleventyConfig) {
   // -----------------------
   // Filters required by templates
   // -----------------------
+
+  // ISO date for sitemap etc.
   eleventyConfig.addFilter("htmlDateString", (dateObj) => {
     if (!dateObj) return "";
     const d = new Date(dateObj);
@@ -17,6 +19,7 @@ module.exports = function (eleventyConfig) {
     return d.toISOString();
   });
 
+  // Make absolute URLs
   eleventyConfig.addFilter("htmlBaseUrl", (url, base) => {
     if (!url) return "";
     if (!base) return url;
@@ -27,6 +30,7 @@ module.exports = function (eleventyConfig) {
     }
   });
 
+  // Sort strings
   eleventyConfig.addFilter("sortAlphabetically", (arr) => {
     if (!Array.isArray(arr)) return arr;
     return [...arr].sort((a, b) =>
@@ -34,10 +38,18 @@ module.exports = function (eleventyConfig) {
     );
   });
 
+  // Filter out internal tags
   eleventyConfig.addFilter("filterTagList", (tags) => {
     if (!Array.isArray(tags)) return tags;
     const ignore = new Set(["all", "nav", "post", "posts", "tagList"]);
     return tags.filter((tag) => !ignore.has(tag));
+  });
+
+  // >>> MISSING ONE: required by tags.njk
+  // Return object keys as an array (safe)
+  eleventyConfig.addFilter("getKeys", (obj) => {
+    if (!obj || typeof obj !== "object") return [];
+    return Object.keys(obj);
   });
 
   // -----------------------
@@ -58,18 +70,20 @@ module.exports = function (eleventyConfig) {
         (Array.isArray(tags) ? tags : [tags]).forEach((t) => tagSet.add(t));
       }
     });
+
     return [...tagSet]
       .filter((tag) => !["all", "nav", "post", "posts", "tagList"].includes(tag))
-      .sort((a, b) => String(a).toLowerCase().localeCompare(String(b).toLowerCase()));
+      .sort((a, b) =>
+        String(a).toLowerCase().localeCompare(String(b).toLowerCase())
+      );
   });
 
   // -----------------------
-  // Directories (IMPORTANT FIX)
+  // Directories (IMPORTANT)
   // -----------------------
   return {
     dir: {
       input: "content",
-      // these are RELATIVE TO input, so we go back to repo root:
       includes: "../_includes",
       data: "../_data",
       output: "_site",
