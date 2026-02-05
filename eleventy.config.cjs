@@ -1,18 +1,47 @@
 module.exports = function (eleventyConfig) {
 
+  /* ============================
+     PASSTHROUGH
+  ============================ */
+  eleventyConfig.addPassthroughCopy("content/img");
+  eleventyConfig.addPassthroughCopy("content/css");
+
+  /* ============================
+     LAYOUT ALIAS
+  ============================ */
+  eleventyConfig.addLayoutAlias("base", "base.njk");
+
+  /* ============================
+     FILTERS — URLs
+  ============================ */
   eleventyConfig.addFilter("htmlBaseUrl", (url, base) => {
-    if (!base) return url;
-    return base.replace(/\/$/, "") + "/" + String(url).replace(/^\//, "");
+    if (!url) return base || "";
+    if (url.startsWith("http")) return url;
+    return `${base || ""}${url}`;
   });
 
-  eleventyConfig.addPassthroughCopy("css");
-  eleventyConfig.addPassthroughCopy("img");
+  /* ============================
+     FILTERS — DATES
+  ============================ */
+  eleventyConfig.addFilter("htmlDateString", (dateObj) => {
+    if (!dateObj) return "";
+    const d = new Date(dateObj);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+  });
 
+  /* ============================
+     ELEVENTY CONFIG
+  ============================ */
   return {
     dir: {
       input: "content",
       includes: "../_includes",
-      output: "_site"
-    }
+      data: "../_data",
+      output: "_site",
+    },
+    templateFormats: ["md", "njk", "html", "xml"],
+    markdownTemplateEngine: "njk",
+    htmlTemplateEngine: "njk",
   };
 };
