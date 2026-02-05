@@ -1,47 +1,64 @@
-module.exports = function (eleventyConfig) {
+import { DateTime } from "luxon";
 
-  /* ============================
-     PASSTHROUGH
-  ============================ */
-  eleventyConfig.addPassthroughCopy("content/img");
-  eleventyConfig.addPassthroughCopy("content/css");
+export default function (eleventyConfig) {
 
-  /* ============================
-     LAYOUT ALIAS
-  ============================ */
-  eleventyConfig.addLayoutAlias("base", "base.njk");
+  /* ----------------------------------------
+   * PASSTHROUGH COPY
+   * -------------------------------------- */
+  eleventyConfig.addPassthroughCopy({ "content/img": "img" });
+  eleventyConfig.addPassthroughCopy("content/robots.txt");
 
-  /* ============================
-     FILTERS — URLs
-  ============================ */
-  eleventyConfig.addFilter("htmlBaseUrl", (url, base) => {
-    if (!url) return base || "";
-    if (url.startsWith("http")) return url;
-    return `${base || ""}${url}`;
-  });
-
-  /* ============================
-     FILTERS — DATES
-  ============================ */
+  /* ----------------------------------------
+   * FILTERS — DATES
+   * -------------------------------------- */
   eleventyConfig.addFilter("htmlDateString", (dateObj) => {
-    if (!dateObj) return "";
-    const d = new Date(dateObj);
-    if (Number.isNaN(d.getTime())) return "";
-    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+    return DateTime.fromJSDate(dateObj, { zone: "utc" }).toFormat("yyyy-LL-dd");
   });
 
-  /* ============================
-     ELEVENTY CONFIG
-  ============================ */
+  /* ----------------------------------------
+   * FILTERS — URLS
+   * -------------------------------------- */
+  eleventyConfig.addFilter("htmlBaseUrl", (url, base) => {
+    if (!base) return url;
+    return new URL(url, base).toString();
+  });
+
+  /* ----------------------------------------
+   * FILTERS — SORTING
+   * -------------------------------------- */
+  eleventyConfig.addFilter("sortAlphabetically", (arr) => {
+    if (!Array.isArray(arr)) return arr;
+
+    return [...arr].sort((a, b) => {
+      const A =
+        typeof a === "string"
+          ? a
+          : (a && (a.title || a.name || a.slug || a.tag)) || String(a);
+      const B =
+        typeof b === "string"
+          ? b
+          : (b && (b.title || b.name || b.slug || b.tag)) || String(b);
+
+      return String(A).localeCompare(String(B), "en", { sensitivity: "base" });
+    });
+  });
+
+  /* ----------------------------------------
+   * LAYOUT ALIAS
+   * -------------------------------------- */
+  eleventyConfig.addLayoutAlias("base", "layouts/base.njk");
+
+  /* ----------------------------------------
+   * ELEVENTY CONFIG
+   * -------------------------------------- */
   return {
     dir: {
       input: "content",
-      includes: "../_includes",
-      data: "../_data",
-      output: "_site",
+      includes: "_includes",
+      data: "_data",
+      output: "_site"
     },
-    templateFormats: ["md", "njk", "html", "xml"],
     markdownTemplateEngine: "njk",
-    htmlTemplateEngine: "njk",
+    htmlTemplateEngine: "njk"
   };
-};
+}
