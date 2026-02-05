@@ -1,42 +1,93 @@
-const { DateTime } = require("luxon");
+// eleventy.config.cjs
 
 module.exports = function (eleventyConfig) {
-  // -----------------
-  // Filters
-  // -----------------
+  // -----------------------
+  // Passthrough (assets)
+  // -----------------------
+  eleventyConfig.addPassthroughCopy({ "content/assets": "assets" });
+  eleventyConfig.addPassthroughCopy({ "content/static": "/" });
 
+  // -----------------------
+  // Filters required by templates
+  // -----------------------
+
+  // Used in sitemap.xml.njk in many base-blog setups
   eleventyConfig.addFilter("htmlDateString", (dateObj) => {
-    return DateTime.fromJSDate(dateObj, { zone: "utc" }).toFormat("yyyy-LL-dd");
+    if (!dateObj) return "";
+    const d = new Date(dateObj);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toISOString(); // full ISO (safe for sitemaps)
   });
 
-  eleventyConfig.addFilter("htmlBaseUrl", (url) => {
+  // Used for making absolute URLs (sitemap/canonical helpers)
+  eleventyConfig.addFilter("htmlBaseUrl", (url, base) => {
     if (!url) return "";
-    return url.replace(/\/index\.html$/, "/");
+    if (!base) return url;
+    try {
+      return new URL(url, base).toString();
+    } catch (e) {
+      return url;
+    }
   });
 
+  // Used by tags.njk in eleventy-base-blog
   eleventyConfig.addFilter("sortAlphabetically", (arr) => {
-    return arr.slice().sort((a, b) => a.localeCompare(b));
+    if (!Array.isArray(arr)) return arr;
+    return [...arr].sort((a, b) =>
+      String(a).toLowerCase().localeCompare(String(b).toLowerCase())
+    );
   });
 
-  // -----------------
-  // Layout aliases
-  // -----------------
+  // IMPORTANT: the one you're missing right now
+  eleventyConfig.addFilter("filterTagList", (tags) => {
+    if (!Array.isArray(tags)) return tags;
 
+    // Tags to ignore (base-blog defaults + common noise)
+    const ignore = new Set([
+      "all",
+      "nav",
+      "post",
+      "posts",
+      "tagList",
+    ]);
+
+    return tags.filter((tag) => !ignore.has(tag));
+  });
+
+  // -----------------------
+  // Layout aliases (optional, but helps)
+  // -----------------------
   eleventyConfig.addLayoutAlias("base", "layouts/base.njk");
   eleventyConfig.addLayoutAlias("home", "layouts/home.njk");
   eleventyConfig.addLayoutAlias("post", "layouts/post.njk");
 
-  // -----------------
-  // Passthrough
-  // -----------------
+  // -----------------------
+  // Basic collections (optional)
+  // -----------------------
+  eleventyConfig.addCollection("tagList", function (collectionApi) {
+    const tagSet = new Set();
 
-  eleventyConfig.addPassthroughCopy("img");
+    collectionApi.getAll().forEach((item) => {
+      if ("tags" in item.data) {
+        const tags = item.data.tags;
+        (Array.isArray(tags) ? tags : [tags]).forEach((t) => tagSet.add(t));
+      }
+    });
 
+    // Return filtered + sorted list
+    return [...tagSet]
+      .filter((tag) => !["all", "nav", "post", "posts", "tagList"].includes(tag))
+      .sort((a, b) => String(a).toLowerCase().localeCompare(String(b).toLowerCase()));
+  });
+
+  // -----------------------
+  // Directories
+  // -----------------------
   return {
     dir: {
       input: "content",
-      includes: "../_includes",
-      data: "../_data",
+      includes: "_includes",
+      data: "_data",
       output: "_site",
     },
     markdownTemplateEngine: "njk",
