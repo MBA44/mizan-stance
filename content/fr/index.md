@@ -1,16 +1,11 @@
 ---
 layout: base
-title: Mizan — Français
+title: Mizan — FR
 permalink: /fr/
 ---
 
-## Entrer en français
+# Mizan
 
-Ici se déploient les textes écrits en langue française.  
-Essais, fragments, cycles, notes de veille.  
-La lecture peut être continue ou discontinue.  
-Rien n’oblige à tout comprendre.  
-Tout oblige à lire avec attention.
+Bienvenue sur Mizan.
 
-- [Lire les textes](/fr/blog/)
-- [À propos](/fr/a-propos/)
+Ici : veille, écriture, cartographie du réel.
