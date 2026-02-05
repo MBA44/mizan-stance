@@ -2,7 +2,6 @@
 	"name": "eleventy-base-blog",
 	"version": "9.0.0",
 	"description": "A starter repository for a blog web site using the Eleventy site generator.",
-	"type": "module",
 	"scripts": {
 		"build": "npx @11ty/eleventy --config=eleventy.config.cjs",
 		"build-nocolor": "cross-env NODE_DISABLE_COLORS=1 npx @11ty/eleventy",
