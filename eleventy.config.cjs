@@ -1,21 +1,18 @@
 module.exports = function (eleventyConfig) {
 
-  const { URL } = require("url");
-
-  eleventyConfig.addFilter("htmlBaseUrl", function (url, base) {
-    try {
-      return new URL(url, base).toString();
-    } catch (e) {
-      return url;
-    }
+  eleventyConfig.addFilter("htmlBaseUrl", (url, base) => {
+    if (!base) return url;
+    return base.replace(/\/$/, "") + "/" + String(url).replace(/^\//, "");
   });
+
+  eleventyConfig.addPassthroughCopy("css");
+  eleventyConfig.addPassthroughCopy("img");
 
   return {
     dir: {
       input: "content",
       includes: "../_includes",
-      data: "../_data",
-      output: "_site",
-    },
+      output: "_site"
+    }
   };
 };
