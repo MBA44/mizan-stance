@@ -1,65 +1,96 @@
 const { DateTime } = require("luxon");
 
-function toJSDate(d) {
-  if (!d) return null;
-  if (d instanceof Date) return d;
-  const parsed = new Date(d);
-  return isNaN(parsed) ? null : parsed;
-}
-
 module.exports = function (eleventyConfig) {
-  // ---------- Date filters (base-blog classics)
+
+  /* =========================
+     PASSTHROUGH
+     ========================= */
+  eleventyConfig.addPassthroughCopy("content/img");
+  eleventyConfig.addPassthroughCopy("content/feed");
+
+
+  /* =========================
+     FILTRES DATES
+     ========================= */
+
+  // Date lisible (blog, listes)
   eleventyConfig.addFilter("readableDate", (dateObj) => {
-    const d = toJSDate(dateObj);
-    if (!d) return "";
-    return DateTime.fromJSDate(d, { zone: "utc" }).toFormat("dd LLL yyyy");
+    if (!dateObj) return "";
+    return DateTime.fromJSDate(dateObj, { zone: "utc" })
+      .setLocale("fr")
+      .toFormat("dd LLL yyyy");
   });
 
-  eleventyConfig.addFilter("htmlDateString", (dateObj) => {
-    const d = toJSDate(dateObj);
-    if (!d) return "";
-    return DateTime.fromJSDate(d, { zone: "utc" }).toFormat("yyyy-LL-dd");
+  // RFC3339 (sitemap, RSS)
+  eleventyConfig.addFilter("dateToRfc3339", (dateObj) => {
+    if (!dateObj) return "";
+    return DateTime.fromJSDate(dateObj, { zone: "utc" }).toISO();
   });
 
-  // ---------- Utility filters (also used by base-blog templates)
-  eleventyConfig.addFilter("head", (arr, n) => {
-    if (!Array.isArray(arr)) return [];
-    if (n < 0) return arr.slice(n);
-    return arr.slice(0, n);
-  });
 
-  eleventyConfig.addFilter("min", (...numbers) => Math.min(...numbers));
+  /* =========================
+     FILTRES TAGS
+     ========================= */
 
-  eleventyConfig.addFilter("getKeys", (target) => {
-    if (!target || typeof target !== "object") return [];
-    return Object.keys(target);
-  });
-
-  eleventyConfig.addFilter("sortAlphabetically", (strings) => {
-    if (!Array.isArray(strings)) return [];
-    return [...strings].sort((a, b) =>
-      String(a).localeCompare(String(b), "en", { sensitivity: "base" })
+  // Filtrer tags techniques Eleventy
+  eleventyConfig.addFilter("filterTagList", (tags) => {
+    if (!tags) return [];
+    return tags.filter(tag =>
+      !["all", "nav", "post", "posts"].includes(tag)
     );
   });
 
-  eleventyConfig.addFilter("filterTagList", (tags) => {
-    if (!Array.isArray(tags)) return [];
-    return tags.filter((tag) => !["all", "nav", "post", "posts"].includes(tag));
+  // Trier alphabétiquement
+  eleventyConfig.addFilter("sortAlphabetically", (arr) => {
+    if (!Array.isArray(arr)) return [];
+    return arr.slice().sort((a, b) => a.localeCompare(b));
   });
 
-  // ---------- Passthrough (safe defaults)
-  eleventyConfig.addPassthroughCopy({ "public": "/" });
-  eleventyConfig.addPassthroughCopy({ "content/assets": "assets" });
+  // Obtenir les clés d’un objet
+  eleventyConfig.addFilter("getKeys", (obj) => {
+    if (!obj) return [];
+    return Object.keys(obj);
+  });
 
-  // ---------- Directories
+
+  /* =========================
+     URL ABSOLUE (SEO / SITEMAP)
+     ========================= */
+
+  eleventyConfig.addFilter("htmlBaseUrl", (url, base) => {
+    if (!url) return "";
+
+    if (/^https?:\/\//i.test(url)) {
+      return url;
+    }
+
+    const baseUrl = (base || "").replace(/\/$/, "");
+    const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+
+    return `${baseUrl}${cleanUrl}`;
+  });
+
+
+  /* =========================
+     COLLECTIONS
+     ========================= */
+
+  eleventyConfig.addCollection("posts", (collectionApi) => {
+    return collectionApi.getFilteredByGlob("content/blog/*.md");
+  });
+
+
+  /* =========================
+     CONFIG GLOBALE
+     ========================= */
+
   return {
     dir: {
       input: "content",
       includes: "../_includes",
-      data: "../_data",
-      output: "_site",
+      output: "_site"
     },
     markdownTemplateEngine: "njk",
-    htmlTemplateEngine: "njk",
+    htmlTemplateEngine: "njk"
   };
 };
