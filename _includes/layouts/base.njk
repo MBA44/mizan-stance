@@ -1,111 +1,12 @@
 <!doctype html>
-<html lang="{{ lang or metadata.language or 'fr' }}">
+<html lang="{{ lang or 'fr' }}">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <title>{{ title }}</title>
-  {% if description %}
-  <meta name="description" content="{{ description }}">
-  {% endif %}
-
-  {# ============================
-     CANONICAL + HREFLANG (FR/EN)
-     ============================ #}
-
-  {% set site = "https://mizan-stance.org" %}
-  {% set p = page.url %}
-  {% set currentLang = (lang or metadata.language or "fr") %}
-  {% set otherLang = "en" if currentLang == "fr" else "fr" %}
-  {% set otherUrl = translation %}
-
-  <link rel="canonical" href="{{ site }}{{ p }}">
-
-  {% if p == "/" %}
-    <link rel="alternate" hreflang="fr" href="{{ site }}/fr/">
-    <link rel="alternate" hreflang="en" href="{{ site }}/en/">
-    <link rel="alternate" hreflang="x-default" href="{{ site }}/">
-  {% else %}
-    {% if otherUrl %}
-      <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}">
-      <link rel="alternate" hreflang="{{ otherLang }}" href="{{ site }}{{ otherUrl }}">
-      <link rel="alternate" hreflang="x-default" href="{{ site }}{{ p }}">
-    {% else %}
-      <link rel="alternate" hreflang="{{ currentLang }}" href="{{ site }}{{ p }}">
-      <link rel="alternate" hreflang="x-default" href="{{ site }}{{ p }}">
-    {% endif %}
-  {% endif %}
-
-  <link rel="alternate"
-        href="/feed/feed.xml"
-        type="application/atom+xml"
-        title="Mizan – Cartographie de veille">
-
-  <style>
-    :root {
-      --color-gray-20: #e0e0e0;
-      --color-gray-50: #c0c0c0;
-      --color-gray-90: #333;
-      --background-color: #fff;
-      --text-color: var(--color-gray-90);
-      --text-color-link: #082840;
-      --text-color-link-active: #5f2b48;
-      --text-color-link-visited: #17050f;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --color-gray-90: #dad8d8;
-        --background-color: #15202b;
-        --text-color-link: #1493fb;
-        --text-color-link-active: #6969f7;
-        --text-color-link-visited: #a6a6f8;
-      }
-    }
-
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0 auto;
-      max-width: 40em;
-      font-family: system-ui, sans-serif;
-      color: var(--text-color);
-      background: var(--background-color);
-    }
-
-    img { max-width: 100%; height: auto; }
-
-    a { color: var(--text-color-link); }
-    a:visited { color: var(--text-color-link-visited); }
-    a:hover, a:active { color: var(--text-color-link-active); }
-
-    /* DEBUG bandeau */
-    .debug {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12px;
-      line-height: 1.3;
-      padding: 10px 12px;
-      border: 1px dashed var(--color-gray-50);
-      margin: 12px 0;
-      opacity: 0.85;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-
 <body>
   <main>
-
-    <!-- DEBUG: retire après diagnostic -->
-    <div class="debug">
-DEBUG
-page.url      = {{ page.url }}
-page.inputPath= {{ page.inputPath }}
-title         = {{ title }}
-lang          = {{ lang or metadata.language or 'fr' }}
-    </div>
-
     {{ content | safe }}
   </main>
 </body>
