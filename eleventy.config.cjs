@@ -2,72 +2,80 @@ const { DateTime } = require("luxon");
 const pluginRss = require("@11ty/eleventy-plugin-rss");
 
 module.exports = function (eleventyConfig) {
-  // -------------------------
-  // Plugins
-  // -------------------------
+
+  /* =========================
+     PLUGINS
+  ========================= */
   eleventyConfig.addPlugin(pluginRss);
 
-  // -------------------------
-  // Passthrough (assets)
-  // (Garde seulement ce qui existe vraiment dans ton repo)
-  // -------------------------
-  eleventyConfig.addPassthroughCopy({ public: "/" });
-  eleventyConfig.addPassthroughCopy({ "content/assets": "assets" });
+  /* =========================
+     FILTERS
+  ========================= */
 
-  // -------------------------
-  // Filters — dates
-  // -------------------------
+  // Date lisible (FR)
   eleventyConfig.addFilter("readableDate", (dateObj) => {
     if (!dateObj) return "";
-    return DateTime.fromJSDate(dateObj, { zone: "utc" }).toFormat("dd LLL yyyy");
+    return DateTime
+      .fromJSDate(dateObj, { zone: "utc" })
+      .setLocale("fr")
+      .toFormat("dd LLLL yyyy");
   });
 
+  // Date ISO (sitemap)
   eleventyConfig.addFilter("htmlDateString", (dateObj) => {
     if (!dateObj) return "";
-    return DateTime.fromJSDate(dateObj, { zone: "utc" }).toFormat("yyyy-LL-dd");
+    return DateTime
+      .fromJSDate(dateObj, { zone: "utc" })
+      .toISODate();
   });
 
-  // -------------------------
-  // Filters — urls
-  // htmlBaseUrl(url, base)
-  // -------------------------
+  // Base URL absolue
   eleventyConfig.addFilter("htmlBaseUrl", (url, base) => {
     if (!url) return "";
-    if (/^https?:\/\//i.test(url)) return url;
-
-    const b = (base || "").toString().replace(/\/$/, "");
-    const u = url.toString();
-    const path = u.startsWith("/") ? u : `/${u}`;
-    return b ? `${b}${path}` : path;
+    return new URL(url, base).toString();
   });
 
-  // -------------------------
-  // Collections (optionnel)
-  // -------------------------
-  eleventyConfig.addCollection("posts", (collectionApi) => {
-    return collectionApi
-      .getFilteredByGlob("content/posts/**/*.{md,njk,html}")
-      .reverse();
+  // Tri alphabétique
+  eleventyConfig.addFilter("sortAlphabetically", (arr) => {
+    if (!Array.isArray(arr)) return [];
+    return [...arr].sort((a, b) => a.localeCompare(b));
   });
 
-  // -------------------------
-  // Layout aliases (optionnel)
-  // -------------------------
+  // Extraire les clés d’un objet
+  eleventyConfig.addFilter("getKeys", (obj) => {
+    if (!obj || typeof obj !== "object") return [];
+    return Object.keys(obj);
+  });
+
+  // Filtrer les tags système
+  eleventyConfig.addFilter("filterTagList", (tags) => {
+    if (!Array.isArray(tags)) return [];
+    return tags.filter(tag =>
+      !["all", "nav", "post", "posts"].includes(tag)
+    );
+  });
+
+  /* =========================
+     LAYOUT ALIASES
+  ========================= */
   eleventyConfig.addLayoutAlias("base", "base.njk");
-  eleventyConfig.addLayoutAlias("default", "base.njk");
+  eleventyConfig.addLayoutAlias("home", "home.njk");
+  eleventyConfig.addLayoutAlias("post", "post.njk");
 
-  // -------------------------
-  // Eleventy dirs
-  // -------------------------
+  /* =========================
+     STATIC FILES
+  ========================= */
+  eleventyConfig.addPassthroughCopy("css");
+
+  /* =========================
+     DIR CONFIG
+  ========================= */
   return {
     dir: {
       input: "content",
       includes: "_includes",
-      data: "_data",
-      output: "_site",
+      layouts: "_includes/layouts",
+      output: "public",
     },
-    markdownTemplateEngine: "njk",
-    htmlTemplateEngine: "njk",
-    templateFormats: ["md", "njk", "html", "liquid", "11ty.js"],
   };
 };
