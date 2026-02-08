@@ -1,86 +1,57 @@
-// eleventy.config.cjs
+const { DateTime } = require("luxon");
+
+function toJSDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  const parsed = new Date(d);
+  return isNaN(parsed) ? null : parsed;
+}
 
 module.exports = function (eleventyConfig) {
-  // -----------------------
-  // Passthrough (assets)
-  // -----------------------
-  eleventyConfig.addPassthroughCopy({ "content/assets": "assets" });
-  eleventyConfig.addPassthroughCopy({ "content/static": "/" });
+  // ---------- Date filters (base-blog classics)
+  eleventyConfig.addFilter("readableDate", (dateObj) => {
+    const d = toJSDate(dateObj);
+    if (!d) return "";
+    return DateTime.fromJSDate(d, { zone: "utc" }).toFormat("dd LLL yyyy");
+  });
 
-  // -----------------------
-  // Filters required by templates
-  // -----------------------
-
-  // ISO date for sitemap etc.
   eleventyConfig.addFilter("htmlDateString", (dateObj) => {
-    if (!dateObj) return "";
-    const d = new Date(dateObj);
-    if (Number.isNaN(d.getTime())) return "";
-    return d.toISOString();
+    const d = toJSDate(dateObj);
+    if (!d) return "";
+    return DateTime.fromJSDate(d, { zone: "utc" }).toFormat("yyyy-LL-dd");
   });
 
-  // Make absolute URLs
-  eleventyConfig.addFilter("htmlBaseUrl", (url, base) => {
-    if (!url) return "";
-    if (!base) return url;
-    try {
-      return new URL(url, base).toString();
-    } catch (e) {
-      return url;
-    }
+  // ---------- Utility filters (also used by base-blog templates)
+  eleventyConfig.addFilter("head", (arr, n) => {
+    if (!Array.isArray(arr)) return [];
+    if (n < 0) return arr.slice(n);
+    return arr.slice(0, n);
   });
 
-  // Sort strings
-  eleventyConfig.addFilter("sortAlphabetically", (arr) => {
-    if (!Array.isArray(arr)) return arr;
-    return [...arr].sort((a, b) =>
-      String(a).toLowerCase().localeCompare(String(b).toLowerCase())
+  eleventyConfig.addFilter("min", (...numbers) => Math.min(...numbers));
+
+  eleventyConfig.addFilter("getKeys", (target) => {
+    if (!target || typeof target !== "object") return [];
+    return Object.keys(target);
+  });
+
+  eleventyConfig.addFilter("sortAlphabetically", (strings) => {
+    if (!Array.isArray(strings)) return [];
+    return [...strings].sort((a, b) =>
+      String(a).localeCompare(String(b), "en", { sensitivity: "base" })
     );
   });
 
-  // Filter out internal tags
   eleventyConfig.addFilter("filterTagList", (tags) => {
-    if (!Array.isArray(tags)) return tags;
-    const ignore = new Set(["all", "nav", "post", "posts", "tagList"]);
-    return tags.filter((tag) => !ignore.has(tag));
+    if (!Array.isArray(tags)) return [];
+    return tags.filter((tag) => !["all", "nav", "post", "posts"].includes(tag));
   });
 
-  // >>> MISSING ONE: required by tags.njk
-  // Return object keys as an array (safe)
-  eleventyConfig.addFilter("getKeys", (obj) => {
-    if (!obj || typeof obj !== "object") return [];
-    return Object.keys(obj);
-  });
+  // ---------- Passthrough (safe defaults)
+  eleventyConfig.addPassthroughCopy({ "public": "/" });
+  eleventyConfig.addPassthroughCopy({ "content/assets": "assets" });
 
-  // -----------------------
-  // Layout aliases
-  // -----------------------
-  eleventyConfig.addLayoutAlias("base", "layouts/base.njk");
-  eleventyConfig.addLayoutAlias("home", "layouts/home.njk");
-  eleventyConfig.addLayoutAlias("post", "layouts/post.njk");
-
-  // -----------------------
-  // Collections
-  // -----------------------
-  eleventyConfig.addCollection("tagList", function (collectionApi) {
-    const tagSet = new Set();
-    collectionApi.getAll().forEach((item) => {
-      if ("tags" in item.data) {
-        const tags = item.data.tags;
-        (Array.isArray(tags) ? tags : [tags]).forEach((t) => tagSet.add(t));
-      }
-    });
-
-    return [...tagSet]
-      .filter((tag) => !["all", "nav", "post", "posts", "tagList"].includes(tag))
-      .sort((a, b) =>
-        String(a).toLowerCase().localeCompare(String(b).toLowerCase())
-      );
-  });
-
-  // -----------------------
-  // Directories (IMPORTANT)
-  // -----------------------
+  // ---------- Directories
   return {
     dir: {
       input: "content",
