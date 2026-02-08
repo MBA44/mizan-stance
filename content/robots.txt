@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 
 Sitemap: https://mizan-stance.org/sitemap.xml
+# Sitemap
+Sitemap: https://mizan-stance.org/sitemap.xml
