@@ -1,11 +1,10 @@
 ---
 layout: layouts/base.njk
-title: Mizan — EN
+title: Mizan
+lang: en
 permalink: /en/
 ---
 
-# Mizan
-
-Welcome to Mizan.
-
-Here: vigilance, writing, a cartography of the real.
+Welcome to **Mizan**.  
+A space of vigilance.  
+A held posture toward reality.
